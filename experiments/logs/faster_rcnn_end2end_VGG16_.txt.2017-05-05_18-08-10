@@ -1,0 +1,12 @@
++ echo Logging output to experiments/logs/faster_rcnn_end2end_VGG16_.txt.2017-05-05_18-08-10
+Logging output to experiments/logs/faster_rcnn_end2end_VGG16_.txt.2017-05-05_18-08-10
++ python ./tools/train_net.py --device gpu --device_id 0 --weights data/pretrain_model/VGG_imagenet.npy --imdb voc_2007_trainval --iters 2 --cfg experiments/cfgs/faster_rcnn_end2end.yml --network VGGnet_train
+Traceback (most recent call last):
+  File "./tools/train_net.py", line 13, in <module>
+    from fast_rcnn.train import get_training_roidb, train_net
+  File "/home/krohitm/code/Faster-RCNN_TF/tools/../lib/fast_rcnn/__init__.py", line 10, in <module>
+    from . import test
+  File "/home/krohitm/code/Faster-RCNN_TF/tools/../lib/fast_rcnn/test.py", line 275
+    num_images = 20
+    ^
+IndentationError: unexpected indent

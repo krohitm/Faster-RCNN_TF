@@ -67,7 +67,7 @@ if __name__ == '__main__':
     print('Using config:')
     pprint.pprint(cfg)
 
-    while not os.path.exists(args.model) and args.wait:
+    while not os.path.exists(args.model + ".meta") and args.wait:
         print('Waiting for {} to exist...'.format(args.model))
         time.sleep(10)
 

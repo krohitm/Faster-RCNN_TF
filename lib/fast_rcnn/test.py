@@ -247,6 +247,7 @@ def apply_nms(all_boxes, thresh):
     nms_boxes = [[[] for _ in xrange(num_images)]
                  for _ in xrange(num_classes)]
     for cls_ind in xrange(num_classes):
+        print cls_ind
         for im_ind in xrange(num_images):
             dets = all_boxes[cls_ind][im_ind]
             if dets == []:
@@ -271,7 +272,9 @@ def apply_nms(all_boxes, thresh):
 
 def test_net(sess, net, imdb, weights_filename , max_per_image=300, thresh=0.05, vis=False):
     """Test a Fast R-CNN network on an image database."""
+    #print "in test_net"
     num_images = len(imdb.image_index)
+    # num_images = 20
     # all detections are collected into:
     #    all_boxes[cls][image] = N x 5 array of detections in
     #    (x1, y1, x2, y2, score)

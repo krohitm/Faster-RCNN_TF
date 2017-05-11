@@ -4,11 +4,13 @@ from fast_rcnn.config import cfg
 from fast_rcnn.test import im_detect
 from fast_rcnn.nms_wrapper import nms
 from utils.timer import Timer
+plt.switch_backend('agg')
 import matplotlib.pyplot as plt
 import numpy as np
-import os, sys, cv2
+import os, sys, cv2, csv
 import argparse
 from networks.factory import get_network
+import pylab
 
 
 CLASSES = ('__background__',
@@ -21,19 +23,31 @@ CLASSES = ('__background__',
 
 #CLASSES = ('__background__','person','bike','motorbike','car','bus')
 
-def vis_detections(im, class_name, dets,ax, thresh=0.5):
+def vis_detections(im, class_name, dets,ax, images_dir, thresh=0.5):
     """Draw detected bounding boxes."""
+    #print "in vis_detections"
     inds = np.where(dets[:, -1] >= thresh)[0]
     if len(inds) == 0:
+        #print 'True'
         return
 
     for i in inds:
         bbox = dets[i, :4]
-        print bbox
+        if class_name=='person':
+            x_min, y_min, x_max, y_max = bbox[0], bbox[1], bbox[2], bbox[3]
+            bounds = [x_min, y_min, x_max, y_max]
+            #print "x_min: {0}, y_min: {1}, x_max: {2}, y_max: {3}".format(x_min,
+            #              y_min, x_max, y_max)
+            
+            with open (os.path.join('/data0/krohitm/', 
+                                    'object_boundaries/person.csv'),'a') as f:
+                writer = csv.writer(f, delimiter = ',')
+                writer.writerow(bounds)
+        
         score = dets[i, -1]
 
         ax.add_patch(
-            plt.Rectangle((bbox[0], bbox[1]),
+           plt.Rectangle((bbox[0], bbox[1]),
                           bbox[2] - bbox[0],
                           bbox[3] - bbox[1], fill=False,
                           edgecolor='red', linewidth=3.5)
@@ -52,14 +66,13 @@ def vis_detections(im, class_name, dets,ax, thresh=0.5):
     plt.draw()
 
 
-def demo(sess, net, image_name):
+def demo(sess, net, image_dir, image_name):
     """Detect object classes in an image using pre-computed object proposals."""
 
     # Load the demo image
-    #im_file = os.path.join(cfg.DATA_DIR, 'demo', image_name)
-    im_file = os.path.join('/home/krohitm/code/Faster-RCNN_TF/data/temp_check/',image_name)
+    im_file = os.path.join(image_dir, image_name)
+    #im_file = os.path.join('/home/krohitm/code/Faster-RCNN_TF/data/temp_check/',image_name)
     im = cv2.imread(im_file)
-
     # Detect all object classes and regress object bounds
     timer = Timer()
     timer.tic()
@@ -76,6 +89,7 @@ def demo(sess, net, image_name):
     CONF_THRESH = 0.8
     NMS_THRESH = 0.3
     for cls_ind, cls in enumerate(CLASSES[1:]):
+        #print "in check"
         cls_ind += 1 # because we skipped background
         cls_boxes = boxes[:, 4*cls_ind:4*(cls_ind + 1)]
         cls_scores = scores[:, cls_ind]
@@ -84,7 +98,8 @@ def demo(sess, net, image_name):
         keep = nms(dets, NMS_THRESH)
         dets = dets[keep, :]
 	#print dets
-        vis_detections(im, cls, dets, ax, thresh=CONF_THRESH)
+        vis_detections(im, cls, dets, ax, images_dir, thresh=CONF_THRESH)
+    pylab.savefig('/data0/krohitm/object_detection/out-{0}.jpg'.format((str(i)).zfill(7)), bbox_inches='tight')
 
 def parse_args():
     """Parse input arguments."""
@@ -98,15 +113,19 @@ def parse_args():
                         default='VGGnet_test')
     parser.add_argument('--model', dest='model', help='Model path',
                         default=' ')
+    parser.add_argument('--images_dir', dest='images_dir', help='folder of images',
+                        default='None')
 
     args = parser.parse_args()
 
     return args
+
 if __name__ == '__main__':
     cfg.TEST.HAS_RPN = True  # Use RPN for proposals
 
     args = parse_args()
-
+    images_dir = args.images_dir
+    
     if args.model == ' ':
         raise IOError(('Error: Model not found.\n'))
         
@@ -129,14 +148,17 @@ if __name__ == '__main__':
 
     #im_names = ['000456.jpg', '000542.jpg', '001150.jpg',
     #            '001763.jpg', '004545.jpg']
-    im_names = ['out-0000001.jpg','out-0000002.jpg','out-0000003.jpg',
-                'out-0000004.jpg','out-0000005.jpg']
+    #im_names = ['1.jpg','2.jpg','3.jpg','4.jpg','5.jpg','6.jpg']
 
-
-    for im_name in im_names:
+    #num_imgs = os.walk('ls -l {0} | wc -l'.format(images_dir))*2
+    #num_imgs = os.system('ls -l $images_dir| wc -l') - 1
+    _,_,files = os.walk("/home/krohitm/posture_dataset/100GOPRO/frames/train_val/").next()
+    num_imgs = len(files)
+    #print num_imgs
+    with open (os.path.join('/data0/krohitm/','object_boundaries/person.csv'), 'w') as f:
+                f.write('x_min,y_min,x_max,y_max\n')
+    for i in range(1,num_imgs+1):
         print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-        print 'Demo for data/demo/{}'.format(im_name)
-        demo(sess, net, im_name)
-
-    plt.show()
-
+        print 'Getting bounds for out-{0}.jpg'.format((str(i)).zfill(7))
+        demo(sess, net, images_dir, 'out-{0}.jpg'.format((str(i)).zfill(7)))
+    #plt.show()

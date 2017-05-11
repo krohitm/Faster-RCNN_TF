@@ -114,7 +114,7 @@ ext_modules = [
 	),
     Extension(
         "utils.cython_nms",
-        ["utils/nms.pyx"],
+        ["utils/cython_nms.pyx"],
         extra_compile_args={'gcc': ["-Wno-cpp", "-Wno-unused-function"]},
         include_dirs = [numpy_include]
     ),

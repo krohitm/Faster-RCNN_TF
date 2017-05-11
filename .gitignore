@@ -1,4 +1,7 @@
 *.pyc
 *.so
 *.o
-faster_rcnn_models
+/data
+/VOCdevkit
+/output
+VGGnet_fast_rcnn_iter_70000.ckpt

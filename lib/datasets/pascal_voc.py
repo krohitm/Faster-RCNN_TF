@@ -261,6 +261,7 @@ class pascal_voc(imdb):
                                        dets[k, 2] + 1, dets[k, 3] + 1))
 
     def _do_python_eval(self, output_dir = 'output'):
+        #print "evaluating"
         annopath = os.path.join(
             self._devkit_path,
             'VOC' + self._year,
@@ -321,6 +322,7 @@ class pascal_voc(imdb):
         status = subprocess.call(cmd, shell=True)
 
     def evaluate_detections(self, all_boxes, output_dir):
+        #print "evaluating"
         self._write_voc_results_file(all_boxes)
         self._do_python_eval(output_dir)
         if self.config['matlab_eval']:
