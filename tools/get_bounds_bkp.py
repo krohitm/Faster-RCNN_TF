@@ -24,7 +24,7 @@ CLASSES = ('__background__',
 
 #CLASSES = ('__background__','person','bike','motorbike','car','bus')
 
-def vis_detections(im, image_name, class_name, dets,ax, images_dir, thresh=0.5):
+def vis_detections(im, class_name, dets,ax, images_dir, thresh=0.5):
     """Draw detected bounding boxes."""
     #print "in vis_detections"
     inds = np.where(dets[:, -1] >= thresh)[0]
@@ -36,33 +36,40 @@ def vis_detections(im, image_name, class_name, dets,ax, images_dir, thresh=0.5):
     for i in inds:
         bbox = dets[i, :4]
         if class_name=='person':
+            class_flag = 1
             x_min, y_min, x_max, y_max = bbox[0], bbox[1], bbox[2], bbox[3]
-            bounds = [image_name, x_min, y_min, x_max, y_max] 
+            bounds = [x_min, y_min, x_max, y_max] 
             with open (os.path.join('/data0/krohitm/', 
                                     'object_boundaries/person.csv'),'a') as f:
                 writer = csv.writer(f, delimiter = ',')
                 writer.writerow(bounds)
         
-            score = dets[i, -1]
+        score = dets[i, -1]
 
-            ax.add_patch(
-                plt.Rectangle((bbox[0], bbox[1]),
-                    bbox[2] - bbox[0],
-                    bbox[3] - bbox[1], fill=False,
-                    edgecolor='red', linewidth=3.5))
-            ax.text(bbox[0], bbox[1] - 2,
+        ax.add_patch(
+           plt.Rectangle((bbox[0], bbox[1]),
+                          bbox[2] - bbox[0],
+                          bbox[3] - bbox[1], fill=False,
+                          edgecolor='red', linewidth=3.5)
+            )
+        ax.text(bbox[0], bbox[1] - 2,
                 '{:s} {:.3f}'.format(class_name, score),
                 bbox=dict(facecolor='blue', alpha=0.5),
                 fontsize=14, color='white')
 
-            plt.axis('off')
-            plt.tight_layout()
-            plt.draw()
-            pylab.savefig('/data0/krohitm/object_detection/{0}'.format(image_name), bbox_inches='tight')
+    ax.set_title(('{} detections with '
+                  'p({} | box) >= {:.1f}').format(class_name, class_name,
+                                                  thresh),
+                  fontsize=14)
+    plt.axis('off')
+    plt.tight_layout()
+    plt.draw()
+    return class_flag
+
 
 def demo(sess, net, image_dir, image_name):
     """Detect object classes in an image using pre-computed object proposals."""
-    #has_class = 0
+    has_class = 0
     # Load the demo image
     im_file = os.path.join(image_dir, image_name)
     #im_file = os.path.join('/home/krohitm/code/Faster-RCNN_TF/data/temp_check/',image_name)
@@ -92,7 +99,15 @@ def demo(sess, net, image_dir, image_name):
         keep = nms(dets, NMS_THRESH)
         dets = dets[keep, :]
 	#print dets
-        vis_detections(im, image_name, cls, dets, ax, images_dir, thresh=CONF_THRESH)
+        class_flag = vis_detections(im, cls, dets, ax, images_dir, thresh=CONF_THRESH)
+        if class_flag == 1:
+            has_class = 1
+    if has_class == 0:
+        bounds = [-1,-1,-1,-1]
+        with open (os.path.join('/data0/krohitm/','object_boundaries/person.csv'),'a') as f:
+            writer = csv.writer(f, delimiter = ',')
+            writer.writerow(bounds)
+    pylab.savefig('/data0/krohitm/object_detection/out-{0}.jpg'.format((str(i)).zfill(7)), bbox_inches='tight')
     plt.close('all')
 
 def parse_args():
