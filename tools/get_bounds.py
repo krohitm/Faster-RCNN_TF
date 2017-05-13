@@ -7,7 +7,7 @@ from utils.timer import Timer
 #import matplotlib.pyplot as plt
 #plt.switch_backend('agg')
 import numpy as np
-import os, sys, cv2, csv
+import os, cv2, csv
 import argparse
 from networks.factory import get_network
 
@@ -163,7 +163,7 @@ if __name__ == '__main__':
             median_boundaries.append(bounds_for_median)
         previous_set = i
     
-    median_boundaries = np.asarray(boundaries)
+    median_boundaries = np.asarray(median_boundaries)
     
     with open (os.path.join('/data0/krohitm/','object_boundaries/person_median.csv'
                             ), 'w') as f:
@@ -180,3 +180,5 @@ if __name__ == '__main__':
         writer = csv.writer(f, delimiter = ',')
         writer.writerows(boundaries)
     f.close()
+    
+    print "\a"
