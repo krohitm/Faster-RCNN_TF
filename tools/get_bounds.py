@@ -117,8 +117,8 @@ if __name__ == '__main__':
                                  ,directory)
         _,_,files = os.walk(image_dir).next()
         num_imgs = len(files)
-        print image_dir
-        print type(files)
+        #print image_dir
+        #print type(files)
         for i in range(1,num_imgs+1):
             timer = Timer()
             print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
@@ -132,29 +132,42 @@ if __name__ == '__main__':
             print ("detection took {:.3f}s".format(timer.total_time))
             image_counter+=1
 	    #remove next 3 lines
-          #  if image_counter >=50:
-         #   	break
+            #if image_counter >=25:
+            #    break
+        #break
 	#num_imgs = image_counter
     
+    boundaries = np.asarray(boundaries)
     #take boundaries of 21 consecutive images in respective directories and find median bounds
-    surrounding_frames = 10
+    num_surrounding_frames = 10
     for dirpath, directory in zip(dirpaths, dirnames):
-        _,_,files = os.walk(os.path.join('data0/krohitm/posture_dataset/100GOPRO/frames/train_val',directory)).next()
+        current_directory = os.path.join(
+        '/data0/krohitm/posture_dataset/100GOPRO/frames/train_val',directory)
+        #print current_directory
+        _,_,files = os.walk(current_directory).next()
         num_imgs = len(files)
         image_dir = os.path.join(dirpath, directory)
         previous_set = 0
         for i in range(1,num_imgs+1):
-            start = max(previous_set, previous_set+i- surrounding_frames)
-            end = min(previous_set+num_imgs,i+surrounding_frames)+1
-            bounds_for_median = np.median(boundaries[start:end, 1:5], axis = 0)
-            image_name_full = os.path.join(directory, 
-                                           '{0}.jpg'.format((str(i)).zfill(7)))
-            np.insert(bounds_for_median,0,image_name_full, axis=1)
+            start = max(previous_set, previous_set+i-num_surrounding_frames)
+            end = min(previous_set+num_imgs,i+2*num_surrounding_frames)-1
+            #print start,end
+            median_window = boundaries[start:end, 1:5].astype(float)
+            #print median_window[0:5,:]
+            bounds_for_median = np.median(median_window, axis = 0)
+            image_name_full = '{0}/{1}.jpg'.format(directory, (str(i)).zfill(7))
+            bounds_for_median= np.array(map(str, bounds_for_median.tolist()))
+            bounds_for_median = np.insert(bounds_for_median,0,image_name_full, axis=0)
+            #print bounds_for_median
+            #break
             median_boundaries.append(bounds_for_median)
         previous_set = i
     
+    median_boundaries = np.asarray(boundaries)
+    
     with open (os.path.join('/data0/krohitm/','object_boundaries/person_median.csv'
                             ), 'w') as f:
+        print "Writing bboxes to median file"
         f.write('image_name, x_min,y_min,x_max,y_max\n')
         writer = csv.writer(f, delimiter = ',')
         writer.writerows(median_boundaries)
@@ -162,6 +175,8 @@ if __name__ == '__main__':
     
     with open (os.path.join('/data0/krohitm/','object_boundaries/person.csv'
                             ), 'w') as f:
+        print "Writing bboxes to actual identified bboxes file"
         f.write('image_name, x_min,y_min,x_max,y_max\n')
         writer = csv.writer(f, delimiter = ',')
         writer.writerows(boundaries)
+    f.close()
