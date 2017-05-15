@@ -24,8 +24,8 @@ if __name__ == '__main__':
     #print set(list(all_dirs))
     
     
-    
-    num_surrounding_frames = 20
+    previous_set = 0
+    num_surrounding_frames = 3
     for dirpath, directory in zip(dirpaths, dirnames):
         current_directory = os.path.join(
         '/data0/krohitm/posture_dataset/100GOPRO/frames/train_val',directory)
@@ -38,28 +38,28 @@ if __name__ == '__main__':
                 num_imgs, directory)
         image_dir = os.path.join('/data0/krohitm/posture_dataset/100GOPRO/frames/train_val'
                                  ,directory)
-        previous_set = 0
-        for i in range(1,num_imgs+1):
+        for i in range(num_imgs):
             start = max(previous_set, previous_set+i-num_surrounding_frames)
-            end = min(previous_set+num_imgs,i+2*num_surrounding_frames)-1
-            #print start,end
+            end = min(previous_set+num_imgs, previous_set+i+num_surrounding_frames)+1
             median_window = boundaries[start:end, 1:5].astype(float)
-            #print median_window[0:5,:]
             bounds_for_median = np.median(median_window, axis = 0)
-            if bounds_for_median.all() == -1:
-                bounds_for_median = boundaries[i,:]
+            if start == 49997:
+                print(median_window)
+                print(bounds_for_median)
+            if np.array_equal(bounds_for_median, np.array([-1,-1,-1,-1])):
+                bounds_for_median = np.array(median_boundaries[i-1])
+            
             image_name_full = os.path.join(
-                    image_dir, '{0}.jpg'.format((str(i)).zfill(7)))
-            #image_name_full = '{0}/{1}.jpg'.format(directory, (str(i)).zfill(7))
+                    image_dir, '{0}.jpg'.format((str(i+1)).zfill(7)))
             bounds_for_median= np.array(map(str, bounds_for_median.tolist()))
-            temp = bounds_for_median
-            bounds_for_median = [image_name_full, temp[0], temp[1], temp[2], temp[3]]
+            bbox = bounds_for_median
             #bounds_for_median = np.insert(bounds_for_median,0,image_name_full, axis=0)
-            #print bounds_for_median
-            #break
-            median_boundaries.append(bounds_for_median)
-        #print image_name_full
-        previous_set = i
+            
+            median_boundaries.append(np.array([image_name_full, bbox[0], bbox[1],
+                                               bbox[2], bbox[3]]))
+        previous_set += i
+        #break
+    #sys.exit
     
     #median_boundaries = np.asarray(median_boundaries)
     
@@ -70,5 +70,3 @@ if __name__ == '__main__':
         writer = csv.writer(f, delimiter = ',')
         writer.writerows(median_boundaries)
     f.close()
-    
-    print "\a"

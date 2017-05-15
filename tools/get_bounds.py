@@ -36,6 +36,7 @@ def demo(sess, net, image_dir, image_name):
     CONF_THRESH = 0.8
     NMS_THRESH = 0.3
     #person_found = 0
+    #only using class_ind 15 for class person
     for cls_ind, cls in enumerate(CLASSES[15:16]):
         #print "in check"
         cls_ind += 15 # because we skipped background
