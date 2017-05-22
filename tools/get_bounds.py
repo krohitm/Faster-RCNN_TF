@@ -27,7 +27,7 @@ def demo(sess, net, image_dir, image_name):
     #has_class = 0
     # Load the demo image
     im_file = os.path.join(image_dir, image_name)
-    #im_file = os.path.join('/home/krohitm/code/Faster-RCNN_TF/data/temp_check/',image_name)
+    
     im = cv2.imread(im_file)
     # Detect all object classes and regress object bounds
     timer.tic()
@@ -35,19 +35,17 @@ def demo(sess, net, image_dir, image_name):
 
     CONF_THRESH = 0.8
     NMS_THRESH = 0.3
-    #person_found = 0
+    
     #only using class_ind 15 for class person
     for cls_ind, cls in enumerate(CLASSES[15:16]):
         #print "in check"
-        cls_ind += 15 # because we skipped background
+        cls_ind += 15 # because we skipped all other classes
         cls_boxes = boxes[:, 4*cls_ind:4*(cls_ind + 1)]
         cls_scores = scores[:, cls_ind]
         dets = np.hstack((cls_boxes,
                           cls_scores[:, np.newaxis])).astype(np.float32)
         keep = nms(dets, NMS_THRESH)
         dets = dets[keep, :]
-        #vis_detections(im, image_name, cls, dets, ax, images_dir, 
-        #               thresh=CONF_THRESH)
         
         inds = np.where(dets[:, -1] >= CONF_THRESH)[0]
         if len(inds) == 0:
@@ -62,11 +60,7 @@ def demo(sess, net, image_dir, image_name):
             boundaries.append(np.array(
                         [os.path.join(image_dir, image_name), x_min, y_min, 
                          x_max, y_max]))
-                
-    #if person_found == 0:
-    #    boundaries.append(np.array([os.path.join(image_dir, image_name
-    #                                             ), -1, -1, -1, -1]))
-
+    
 def parse_args():
     """Parse input arguments."""
     parser = argparse.ArgumentParser(description='Faster R-CNN demo')
@@ -104,22 +98,19 @@ if __name__ == '__main__':
     saver = tf.train.Saver(write_version=tf.train.SaverDef.V1)
     saver.restore(sess, args.model)
    
-    #sess.run(tf.initialize_all_variables())
-
     print '\n\nLoaded network {:s}'.format(args.model)
     
     dirpaths,dirnames,_ = os.walk('/data0/krohitm/posture_dataset/100GOPRO/frames/train_val'
                                   ).next()
     dirnames.sort()
-    #print "Following directories exist: ", dirnames
+    
     image_counter = 1
     for dirpath, directory in zip(dirpaths, dirnames):
         image_dir = os.path.join('/data0/krohitm/posture_dataset/100GOPRO/frames/train_val'
                                  ,directory)
         _,_,files = os.walk(image_dir).next()
         num_imgs = len(files)
-        #print image_dir
-        #print type(files)
+        
         for i in range(1,num_imgs+1):
             timer = Timer()
             print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
@@ -132,47 +123,8 @@ if __name__ == '__main__':
             timer.toc()
             print ("detection took {:.3f}s".format(timer.total_time))
             image_counter+=1
-	    #remove next 3 lines
-            #if image_counter >=25:
-            #    break
-        #break
-	#num_imgs = image_counter
     
     boundaries = np.asarray(boundaries)
-    #take boundaries of 21 consecutive images in respective directories and find median bounds
-    num_surrounding_frames = 10
-    for dirpath, directory in zip(dirpaths, dirnames):
-        current_directory = os.path.join(
-        '/data0/krohitm/posture_dataset/100GOPRO/frames/train_val',directory)
-        #print current_directory
-        _,_,files = os.walk(current_directory).next()
-        num_imgs = len(files)
-        image_dir = os.path.join(dirpath, directory)
-        previous_set = 0
-        for i in range(1,num_imgs+1):
-            start = max(previous_set, previous_set+i-num_surrounding_frames)
-            end = min(previous_set+num_imgs,i+2*num_surrounding_frames)-1
-            #print start,end
-            median_window = boundaries[start:end, 1:5].astype(float)
-            #print median_window[0:5,:]
-            bounds_for_median = np.median(median_window, axis = 0)
-            image_name_full = '{0}/{1}.jpg'.format(directory, (str(i)).zfill(7))
-            bounds_for_median= np.array(map(str, bounds_for_median.tolist()))
-            bounds_for_median = np.insert(bounds_for_median,0,image_name_full, axis=0)
-            #print bounds_for_median
-            #break
-            median_boundaries.append(bounds_for_median)
-        previous_set = i
-    
-    median_boundaries = np.asarray(median_boundaries)
-    
-    with open (os.path.join('/data0/krohitm/','object_boundaries/person_median.csv'
-                            ), 'w') as f:
-        print "Writing bboxes to median file"
-        f.write('image_name, x_min,y_min,x_max,y_max\n')
-        writer = csv.writer(f, delimiter = ',')
-        writer.writerows(median_boundaries)
-    f.close()
     
     with open (os.path.join('/data0/krohitm/','object_boundaries/person.csv'
                             ), 'w') as f:
@@ -182,4 +134,3 @@ if __name__ == '__main__':
         writer.writerows(boundaries)
     f.close()
     
-    print "\a"

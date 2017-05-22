@@ -6,7 +6,7 @@ Created on Sat May 13 16:57:45 2017
 @author: krohitm
 """
 import numpy as np
-import os, csv,sys
+import os, csv
 
 median_boundaries = []
 
@@ -17,22 +17,20 @@ if __name__ == '__main__':
     
     boundaries = np.array(np.loadtxt('/data0/krohitm/object_boundaries/person.csv',
                                      dtype = str, delimiter = ',', skiprows = 1, ))
-    #print boundaries.shape
+    
     all_dirs = np.apply_along_axis(lambda a: (a[0].split('/')),1,boundaries)
     all_dirs = all_dirs[:,-2]
-    #print all_dirs.shape
-    #print set(list(all_dirs))
     
     
     previous_set = 0
-    num_surrounding_frames = 3
+    num_surrounding_frames = 10
     for dirpath, directory in zip(dirpaths, dirnames):
         current_directory = os.path.join(
         '/data0/krohitm/posture_dataset/100GOPRO/frames/train_val',directory)
-        #print current_directory
+        
         _,_,files = os.walk(current_directory).next()
         
-        #for i in range
+        
         num_imgs = list(all_dirs).count(directory)
         print "Getting median boundaries for the {0} images in {1} folder".format(
                 num_imgs, directory)
@@ -43,25 +41,20 @@ if __name__ == '__main__':
             end = min(previous_set+num_imgs, previous_set+i+num_surrounding_frames)+1
             median_window = boundaries[start:end, 1:5].astype(float)
             bounds_for_median = np.median(median_window, axis = 0)
-            if start == 49997:
-                print(median_window)
-                print(bounds_for_median)
-            if np.array_equal(bounds_for_median, np.array([-1,-1,-1,-1])):
-                bounds_for_median = np.array(median_boundaries[i-1])
             
+            if np.array_equal(bounds_for_median, np.array([-1,-1,-1,-1])):
+                bounds_for_median = np.array(median_boundaries[i-1][1:5])
+            
+	    #should have been using the exact image names instead
             image_name_full = os.path.join(
                     image_dir, '{0}.jpg'.format((str(i+1)).zfill(7)))
             bounds_for_median= np.array(map(str, bounds_for_median.tolist()))
             bbox = bounds_for_median
-            #bounds_for_median = np.insert(bounds_for_median,0,image_name_full, axis=0)
             
             median_boundaries.append(np.array([image_name_full, bbox[0], bbox[1],
                                                bbox[2], bbox[3]]))
         previous_set += i
-        #break
-    #sys.exit
-    
-    #median_boundaries = np.asarray(median_boundaries)
+        
     
     with open (os.path.join('/data0/krohitm/','object_boundaries/person_median.csv'
                             ), 'w') as f:

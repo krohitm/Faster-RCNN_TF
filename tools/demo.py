@@ -9,14 +9,17 @@ import numpy as np
 import os, sys, cv2
 import argparse
 from networks.factory import get_network
+plt.switch_backend('agg')
 
 
 CLASSES = ('__background__',
-           'aeroplane', 'bicycle', 'bird', 'boat',
-           'bottle', 'bus', 'car', 'cat', 'chair',
-           'cow', 'diningtable', 'dog', 'horse',
-           'motorbike', 'person', 'pottedplant',
-           'sheep', 'sofa', 'train', 'tvmonitor')
+           #'aeroplane', 'bicycle', 'bird', 'boat',
+           #'bottle', 'bus', 'car', 'cat', 'chair',
+           #'cow', 'diningtable', 'dog', 'horse',
+           #'motorbike', 
+           'person'#, 'pottedplant',
+           #'sheep', 'sofa', 'train', 'tvmonitor
+           )
 
 
 #CLASSES = ('__background__','person','bike','motorbike','car','bus')
@@ -57,7 +60,9 @@ def demo(sess, net, image_name):
 
     # Load the demo image
     #im_file = os.path.join(cfg.DATA_DIR, 'demo', image_name)
-    im_file = os.path.join('/home/krohitm/code/Faster-RCNN_TF/data/temp_check/',image_name)
+    im_path = '/data0/krohitm/posture_dataset/scott_vid/images'
+    im_file = os.path.join(im_path, image_name)
+    #im_file = os.path.join('/home/krohitm/code/Faster-RCNN_TF/data/temp_check/',image_name)
     im = cv2.imread(im_file)
 
     # Detect all object classes and regress object bounds
@@ -129,14 +134,16 @@ if __name__ == '__main__':
 
     #im_names = ['000456.jpg', '000542.jpg', '001150.jpg',
     #            '001763.jpg', '004545.jpg']
-    im_names = ['out-0000001.jpg','out-0000002.jpg','out-0000003.jpg',
-                'out-0000004.jpg','out-0000005.jpg']
+    im_names = map(lambda q: (q.zfill(7)), map(str, np.arange(1,813)))
+    #im_names = ['000001.jpg','000002.jpg','000003.jpg','000004.jpg','000005.jpg', '000120.jpg', '000386.jpg','000512.jpg']
 
 
     for im_name in im_names:
+	im_name = '{0}.jpg'.format((str(im_name)).zfill(6))
         print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
         print 'Demo for data/demo/{}'.format(im_name)
         demo(sess, net, im_name)
-
-    plt.show()
+	plt.savefig('/data0/krohitm/posture_dataset/scott_vid/images/detections/{0}'.format(im_name), bbox_inches='tight')
+    #plt.show()
+    #plt.savefig('/data0/krohitm/posture_dataset/scott_vid/images/detections/{0}.jpg'.format((str(i+1)).zfill(7)), bbox_inches='tight')
 

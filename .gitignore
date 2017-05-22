@@ -4,4 +4,5 @@
 /data
 /VOCdevkit
 /output
-VGGnet_fast_rcnn_iter_70000.ckpt
+/experiments/logs
+VGGnet_fast_rcnn_iter_*.ckpt
