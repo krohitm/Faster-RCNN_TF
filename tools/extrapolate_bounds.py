@@ -38,27 +38,10 @@ if __name__ == '__main__':
                 end_disc_frame = os.path.join(image_home_dir, folder_name, 
                                               ((disc_range[1].split('-')[1]).zfill(7) + '.jpg'))
         
-        #before_img = int(start_disc_frame)-1
-        #after_img = int(end_disc_frame)+1
-        #num_disc_frames = after_img - before_img + 2
-        
-        #before_img_name = '/data0/krohitm/posture_dataset/100GOPRO/frames/train_val/' + disc_range[0] + str(
-        #        before_img).zfill(7) + '.jpg'
-        #after_img_name =
             first_frame = np.where(median_boundaries[:,0] == start_disc_frame)
             last_frame = np.where(median_boundaries[:,0] == end_disc_frame)
             total_frames = last_frame - first_frame + 2 #+2 for the surrounding correct frames
-        
-        
-        #per_frame_xmin_shift = (float(median_boundaries[last_frame + 1, 1]) - float(
-        #        median_boundaries[first_frame - 1, 1]))/total_frames
-        #per_frame_ymin_shift = float(median_boundaries[last_frame + 1, 2]) - float(
-        #        median_boundaries[first_frame - 1, 2])/total_frames
-        #per_frame_xmax_shift = float(median_boundaries[last_frame + 1, 3]) - float(
-        #        median_boundaries[first_frame - 1, 3])/total_frames
-        #per_frame_ymax_shift = float(median_boundaries[last_frame + 1, 4]) - float(
-        #        median_boundaries[first_frame - 1, 4])/total_frames
-        
+                
             per_frame_shift = (map(float, median_boundaries[last_frame + 1, 1:5]) - map(
                     float, median_boundaries[first_frame - 1, 1:5]))/total_frames
         
