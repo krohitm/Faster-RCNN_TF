@@ -46,10 +46,6 @@ def run(im,coords,frame_num, multi=True):
 
     while True:
         # Draw the rectangular boxes on the image
-<<<<<<< HEAD
-=======
-        window_name_2 = "Objects to be tracked."
->>>>>>> 735b8b0afe2c42d5d2c46f5718da8410afce1ece
         for pt1, pt2 in zip(pts_1, pts_2):
             rects.append([pt1[0],pt2[0], pt1[1], pt2[1]])
             cv2.rectangle(im_disp, (pt1[0]-4,pt1[1]-5), pt2, (255, 255, 255), 3)
