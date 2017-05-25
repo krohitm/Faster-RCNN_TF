@@ -44,16 +44,19 @@ def annotate(home_dir):
                 del coords[i]
                 start = i
             i += 1
+<<<<<<< HEAD
     
     #frame_counter = 0 #to skip frames and later extrapolate in between
     for i in range(start, len(all_image_names)):
         if i%5 != 0:    #drawing at a rate of 3fps for a 15 fps video
             continue
+    #frame_counter = 0 #to skip frames and later extrapolate in between
+    	735b8b0afe2c42d5d2c46f5718da8410afce1ece
         cur_fname=[all_image_names[i]]
         img=plt.imread(cur_fname[0])
         points=get_pts_for_ims.run(img,np.array([0,0,0,0]), str(i))
         points = cur_fname + points
-        if max(map(float, points[1:5])) == 0:
+	if max(map(float, points[1:5])) == 0:
             break
         #extrapolate for the middle four points
         per_frame_shift = (map(float, coords[i][1:5]) - map(float, coords[i-5][1:5]))/5
@@ -61,8 +64,6 @@ def annotate(home_dir):
             points_temp = map(float, coords[j-1][1:5])+per_frame_shift
             coords.append(map(str, points_temp))
         coords.append(points)
-
-        
 
     with open (os.path.join(home_dir, 'person_bbox.csv'), 'w') as f:
         print "Writing bboxes to bbox file"
@@ -75,9 +76,6 @@ def annotate(home_dir):
 if __name__=='__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument("-i", "--parent_folder", required=True, help="Path to parent folder")
-    #ap.add_argument('--use_fps', dest='gpu_id', help='GPU device id to use [0]',
-    #                    default=0, type=int)
-
     args = vars(ap.parse_args())
     parent_folder = args['parent_folder']
     annotate(parent_folder)
