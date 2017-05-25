@@ -6,7 +6,7 @@ from fast_rcnn.nms_wrapper import nms
 from utils.timer import Timer
 import matplotlib.pyplot as plt
 import numpy as np
-import os, sys, cv2
+import os, sys, cv2, csv
 import argparse
 from networks.factory import get_network
 plt.switch_backend('agg')
@@ -18,13 +18,15 @@ CLASSES = ('__background__',
            #'cow', 'diningtable', 'dog', 'horse',
            #'motorbike', 
            'person'#, 'pottedplant',
-           #'sheep', 'sofa', 'train', 'tvmonitor
+           #'sheep', 'sofa', 'train', 'tvmonitor'
            )
 
 
 #CLASSES = ('__background__','person','bike','motorbike','car','bus')
 
-def vis_detections(im, class_name, dets,ax, thresh=0.5):
+boundaries = []
+
+def vis_detections(im, image_dir, image_name, class_name, dets,ax, thresh=0.5):
     """Draw detected bounding boxes."""
     inds = np.where(dets[:, -1] >= thresh)[0]
     if len(inds) == 0:
@@ -32,7 +34,11 @@ def vis_detections(im, class_name, dets,ax, thresh=0.5):
 
     for i in inds:
         bbox = dets[i, :4]
-        print bbox
+        x_min, y_min, x_max, y_max = bbox[0], bbox[1], bbox[2], bbox[3]
+        #print image_dir
+        #print im
+        boundaries.append(np.array([os.path.join(image_dir, image_name)
+            , x_min, y_min, x_max, y_max]))
         score = dets[i, -1]
 
         ax.add_patch(
@@ -55,14 +61,10 @@ def vis_detections(im, class_name, dets,ax, thresh=0.5):
     plt.draw()
 
 
-def demo(sess, net, image_name):
+def demo(sess, net, image_dir, image_name):
     """Detect object classes in an image using pre-computed object proposals."""
 
-    # Load the demo image
-    #im_file = os.path.join(cfg.DATA_DIR, 'demo', image_name)
-    im_path = '/data0/krohitm/posture_dataset/scott_vid/images'
-    im_file = os.path.join(im_path, image_name)
-    #im_file = os.path.join('/home/krohitm/code/Faster-RCNN_TF/data/temp_check/',image_name)
+    im_file = os.path.join(image_dir, image_name)
     im = cv2.imread(im_file)
 
     # Detect all object classes and regress object bounds
@@ -89,7 +91,7 @@ def demo(sess, net, image_name):
         keep = nms(dets, NMS_THRESH)
         dets = dets[keep, :]
 	#print dets
-        vis_detections(im, cls, dets, ax, thresh=CONF_THRESH)
+        vis_detections(im, image_dir, image_name, cls, dets, ax, thresh=CONF_THRESH)
 
 def parse_args():
     """Parse input arguments."""
@@ -132,18 +134,38 @@ if __name__ == '__main__':
     for i in xrange(2):
         _, _= im_detect(sess, net, im)
 
-    #im_names = ['000456.jpg', '000542.jpg', '001150.jpg',
-    #            '001763.jpg', '004545.jpg']
-    im_names = map(lambda q: (q.zfill(7)), map(str, np.arange(1,813)))
-    #im_names = ['000001.jpg','000002.jpg','000003.jpg','000004.jpg','000005.jpg', '000120.jpg', '000386.jpg','000512.jpg']
+    home_dir = '/data0/krohitm/posture_dataset/scott_vid/images'
+    dirpaths,dirnames,_ = os.walk(home_dir).next()
 
+    dirnames.sort()
 
-    for im_name in im_names:
-	im_name = '{0}.jpg'.format((str(im_name)).zfill(6))
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-        print 'Demo for data/demo/{}'.format(im_name)
-        demo(sess, net, im_name)
-	plt.savefig('/data0/krohitm/posture_dataset/scott_vid/images/detections/{0}'.format(im_name), bbox_inches='tight')
+    for dirpath, directory in zip(dirpaths, dirnames):
+        image_dir = os.path.join(home_dir,directory)
+        #print image_dir
+        _,_,all_images = os.walk(image_dir).next()
+        all_images.sort()
+        
+        try:
+            os.mkdir(os.path.join(home_dir, '../detections/{0}'.format(directory)))
+        except OSError:
+            print "Directory {0} already exists".format(directory)
+
+        for im_name in all_images:
+            plt.close('all')
+            print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+            print 'Getting bounds for {0}/{1}'.format(directory, im_name)
+            demo(sess, net, image_dir, im_name)
+            plt.savefig('{0}/../detections/{1}/{2}'.format(home_dir, directory, im_name), 
+                bbox_inches='tight')
+
+    boundaries = np.asarray(boundaries)
+
+    with open (os.path.join(home_dir, '../detections/bbox.csv'), 'w') as f:
+        print "Writing bboxes to actual identified bboxes file"
+        f.write('image_name, x_min,y_min,x_max,y_max\n')
+        writer = csv.writer(f, delimiter = ',')
+        writer.writerows(boundaries)
+    f.close()
     #plt.show()
     #plt.savefig('/data0/krohitm/posture_dataset/scott_vid/images/detections/{0}.jpg'.format((str(i+1)).zfill(7)), bbox_inches='tight')
 

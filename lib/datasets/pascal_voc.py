@@ -276,6 +276,7 @@ class pascal_voc(imdb):
             self._image_set + '.txt')
         cachedir = os.path.join(self._devkit_path, 'annotations_cache')
         aps = []
+	correct_aps = []
         # The PASCAL VOC metric changed in 2010
         use_07_metric = True if int(self._year) < 2010 else False
         print 'VOC07 metric? ' + ('Yes' if use_07_metric else 'No')
@@ -285,19 +286,33 @@ class pascal_voc(imdb):
             if cls == '__background__':
                 continue
             filename = self._get_voc_results_file_template().format(cls)
-            rec, prec, ap = voc_eval(
+            rec, prec, ap, correct_ap, accuracy = voc_eval(
                 filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
                 use_07_metric=use_07_metric)
             aps += [ap]
+	    correct_aps += [correct_ap]
             print('AP for {} = {:.4f}'.format(cls, ap))
             with open(os.path.join(output_dir, cls + '_pr.pkl'), 'w') as f:
-                cPickle.dump({'rec': rec, 'prec': prec, 'ap': ap}, f)
+                cPickle.dump({'rec': rec, 'prec': prec, 'ap': ap, 'correct_ap': correct_ap, 'accuracy': accuracy}, f)
         print('Mean AP = {:.4f}'.format(np.mean(aps)))
-        print('~~~~~~~~')
+	print('Correct Mean AP = {:.4f}'.format(np.mean(correct_aps)))
+	#print('Recall = {:.4f}'.format(rec))
+	print ('Recall = {}'.format(rec[-1]))
+	#print('Precision = {:.4f}'.format(prec))
+	print('Precision = {}'.format(prec[-1])) 
+	print('Accuracy is calculated as TP/(TP+FP+FN)')
+	#print('Accuracy = {:.4f}'.format(accuracy))
+        print('Accuracy = {}'.format(accuracy[-1]))
+	print('~~~~~~~~')
         print('Results:')
+	print('Average Precisions')
         for ap in aps:
             print('{:.3f}'.format(ap))
+	print('Correct Average Precisions')
+	for correct_ap in correct_aps:
+	    print('{:.3f}'.format(correct_ap))
         print('{:.3f}'.format(np.mean(aps)))
+	print('{:.3f}'.format(np.mean(correct_aps)))
         print('~~~~~~~~')
         print('')
         print('--------------------------------------------------------------')
