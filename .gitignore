@@ -1,6 +1,7 @@
 *.pyc
 *.so
 *.o
+/temp
 /data
 /VOCdevkit
 /output

@@ -134,7 +134,8 @@ if __name__ == '__main__':
     for i in xrange(2):
         _, _= im_detect(sess, net, im)
 
-    home_dir = '/data0/krohitm/posture_dataset/scott_vid/images'
+    #home_dir = '/data0/krohitm/posture_dataset/scott_vid/images'
+    home_dir = '/home/krohitm/code/Faster-RCNN_TF/temp/images'
     dirpaths,dirnames,_ = os.walk(home_dir).next()
 
     dirnames.sort()
