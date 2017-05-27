@@ -70,9 +70,6 @@ def annotate(home_dir):
                 coords.append([all_image_names[j]] + list(points_temp))
         coords.append(points)
         
-
-        
-
     with open (os.path.join(home_dir, 'person_bbox.csv'), 'w') as f:
         print "Writing bboxes to bbox file"
         f.write('image_name,x_min,y_min,x_max,y_max\n')

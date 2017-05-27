@@ -57,6 +57,7 @@ def run(im,coords,frame_num, multi=True):
             # Press key `d` to return the selected points
             cv2.destroyAllWindows()
             point= [(tl + br) for tl, br in zip(pts_1, pts_2)]
+            #print point
             corrected_point=check_point(point)
             if len(corrected_point) == 1:
                 out_area=(corrected_point[2]-corrected_point[0])*(corrected_point[3]-corrected_point[1])
@@ -72,7 +73,7 @@ def run(im,coords,frame_num, multi=True):
             return_noth=[0,0,0,0]
             return return_noth
         elif key == ord('f'):
-            # Press ket `f` to delete the last rectangular region
+            # Press key `f` to delete the last rectangular region
             if run.mouse_down == False and pts_1:
                 print "Object deleted at  [{}, {}]".format(pts_1[-1], pts_2[-1])
                 pts_1.pop()

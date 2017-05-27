@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-
+plt.switch_backend('agg') 
 
 median_boundaries = []
 
@@ -19,7 +19,7 @@ if __name__ == '__main__':
                                      dtype=str, delimiter=',', skiprows=1, ))
         
     
-    for i in range(len(median_boundaries[:,0])):
+    for i in range(140000,len(median_boundaries[:,0])):
     #for i in np.arange(49995,50005):
         #image_name_full = median_boundaries[i,0]
         image_name_full = '/home/krohitm/code/Faster-RCNN_TF/data/VOCdevkit2007/VOC2007/JPEGImages/{0}.jpg'.format(
