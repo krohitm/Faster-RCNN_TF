@@ -355,8 +355,10 @@ def test_net(sess, net, imdb, weights_filename , max_per_image=300, thresh=0.05,
            plt.show()
         if saveFig:
             plt.axis("off")
-            plt.savefig('/home/krohitm/code/Faster-RCNN_TF/data/test_detections/{0}.jpg'.format((
-                str(i+1)).zfill(7)), bbox_inches='tight')
+            plt.savefig('/data0/krohitm/posture_dataset/scott_vid/ICU_test/detections/{0}.jpg'.format((
+                    str(i+1)).zfill(7)), bbox_inches='tight')
+            #plt.savefig('/home/krohitm/code/Faster-RCNN_TF/data/test_detections/{0}.jpg'.format((
+            #    str(i+1)).zfill(7)), bbox_inches='tight')
         # Limit to max_per_image detections *over all classes*
         if max_per_image > 0:
             image_scores = np.hstack([all_boxes[j][i][:, -1]

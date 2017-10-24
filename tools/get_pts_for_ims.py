@@ -39,8 +39,10 @@ def run(im,coords,frame_num, multi=True):
 
     print "Press and release mouse around the object to be tracked. \n You can also select multiple objects."
     cv2.setMouseCallback(window_name, callback)
-
+    
+    print "Press key `n` to continue with the previous points."
     print "Press key `d` to continue with the selected points."
+    print "Press key 'w' to skip the frames, in case no identifiable object exists"
     print "Press key `f` to discard the last object selected."
     print "Press key `s` to quit the program."
 
@@ -53,7 +55,10 @@ def run(im,coords,frame_num, multi=True):
         #cv2.namedWindow(window_name_2, cv2.WINDOW_NORMAL)
         #cv2.imshow(window_name_2, im_disp)
         key = cv2.waitKey(30)
-        if key == ord('d'):
+        # Press key 'w' to skip the frames, in case no identifiable object exists
+        if key == ord('w'):
+            return [-1,-1,-1,-1]
+        elif key == ord('d'):
             # Press key `d` to return the selected points
             cv2.destroyAllWindows()
             point= [(tl + br) for tl, br in zip(pts_1, pts_2)]
@@ -81,6 +86,9 @@ def run(im,coords,frame_num, multi=True):
                 im_disp = im.copy()
             else:
                 print "No object to delete."
+        elif key == ord('n'):
+            #press key 'n' to use the bboxes from the previous frames
+            return [-5,-5,-5,-5]
     cv2.destroyAllWindows()
     point= [(tl + br) for tl, br in zip(pts_1, pts_2)]
     corrected_point=check_point(point)

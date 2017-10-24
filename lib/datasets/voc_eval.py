@@ -198,13 +198,13 @@ def voc_eval(detpath,
         # ground truth
         prec = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
         ap = voc_ap(rec, prec, use_07_metric)
-	correct_ap = voc_ap(rec, prec)
-	accuracy = tp / np.maximum(npos + fp, np.finfo(np.float64).eps)
+        correct_ap = voc_ap(rec, prec)
+        accuracy = tp / np.maximum(npos + fp, np.finfo(np.float64).eps)
     else:
          rec = -1
          prec = -1
          ap = -1
-	 accuracy = -1
-	 correct_ap = -1
+         accuracy = -1
+         correct_ap = -1
 
     return rec, prec, ap, correct_ap, accuracy

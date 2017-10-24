@@ -48,17 +48,18 @@ LOG="experiments/logs/faster_rcnn_end2end_${NET}_${EXTRA_ARGS_SLUG}.txt.`date +'
 exec &> >(tee -a "$LOG")
 echo Logging output to "$LOG"
 
-time python ./tools/train_net.py --device ${DEV} --device_id ${DEV_ID} \
-  --weights data/pretrain_model/VGG_imagenet.npy \
-  --imdb ${TRAIN_IMDB} \
-  --iters ${ITERS} \
-  --cfg experiments/cfgs/faster_rcnn_end2end.yml \
-  --network VGGnet_train \
-  ${EXTRA_ARGS}
+#time python ./tools/train_net.py --device ${DEV} --device_id ${DEV_ID} \
+#  --weights data/pretrain_model/VGG_imagenet.npy \
+#  --imdb ${TRAIN_IMDB} \
+#  --iters ${ITERS} \
+#  --cfg experiments/cfgs/faster_rcnn_end2end.yml \
+#  --network VGGnet_train \
+#  ${EXTRA_ARGS}
 
-set +x
-NET_FINAL=`grep -B 1 "done solving" ${LOG} | grep "Wrote snapshot" | awk '{print $4}'`
-set -x
+#set +x
+#NET_FINAL=`grep -B 1 "done solving" ${LOG} | grep "Wrote snapshot" | awk '{print $4}'`
+#set -x
+NET_FINAL=/home/krohitm/code/Faster-RCNN_TF/output/faster_rcnn_end2end/voc_2007_trainval/VGGnet_fast_rcnn_iter_5000.ckpt
 
 time python ./tools/test_net.py --device ${DEV} --device_id ${DEV_ID} \
   --weights ${NET_FINAL} \

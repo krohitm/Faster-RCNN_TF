@@ -1,12 +1,12 @@
 # Import the required modules
 #import dlib
-#import cv2
+import cv2
 import argparse
 import get_pts_for_ims
 import numpy as np
 import os
 import csv
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 #import re
 
 
@@ -41,34 +41,51 @@ def annotate(home_dir):
         
         i = 0
         start = len(coords)+1
-        #while i < len(coords) and start == 0:
-        #    if max(map(float, coords[i][1:5])) == 0:
-        #        del coords[i]
-        #        start = i
-        #    print i
-        #    i += 1
     
-    ext_frames = 5
+    frames_to_skip = 5
+    i = start
     #frame_counter = 0 #to skip frames and later extrapolate in between
-    for i in range(start, len(all_image_names)):
+    while i < len(all_image_names):
+    #for i in range(start, len(all_image_names)):
+        if len(all_image_names) - i < frames_to_skip:
+            ext_frames = len(all_image_names) - i
+        else:
+            ext_frames = frames_to_skip
         if i%ext_frames != 0:    #drawing at a rate of 3fps for a 15 fps video
-            continue
+            i += 1
+	    continue
         cur_fname=[all_image_names[i]]
-        img=plt.imread(cur_fname[0])
+        img=cv2.imread(cur_fname[0])
         points=get_pts_for_ims.run(img,np.array([0,0,0,0]), str(i))
-        points = cur_fname + points
+        if points == [-5,-5,-5,-5]:
+            print i-ext_frames
+            points = cur_fname + coords[i-ext_frames][1:5]
+            nothing_found = 0
+        elif points == [-1,-1,-1,-1]:
+            nothing_found = 1
+            
+            points = cur_fname + points
+        else:
+            points = cur_fname + points
+            nothing_found = 0
 
         if max(map(float, points[1:5])) == 0:
             break
 
         #extrapolate for the middle four points
         if i != 0:
-            per_frame_shift = (np.asarray(points[1:5], float) - np.asarray(
-                coords[i-ext_frames][1:5], float))/ext_frames
-            for j in range(i-ext_frames+1, i):
-                points_temp = np.asarray(coords[j-1][1:5], float) + per_frame_shift
-                coords.append([all_image_names[j]] + list(points_temp))
+            if nothing_found == 1:
+                for j in range(i-ext_frames+1, i):
+                    coords.append([all_image_names[j]] + [-1,-1,-1,-1])
+            else:
+                per_frame_shift = (np.asarray(points[1:5], float) - np.asarray(
+                        coords[i-ext_frames][1:5], float))/ext_frames
+                for j in range(i-ext_frames+1, i):
+                    points_temp = np.asarray(coords[j-1][1:5], float) + per_frame_shift
+                    coords.append([all_image_names[j]] + list(points_temp))
         coords.append(points)
+        print "Annotated till {}".format(cur_fname)
+        i += 1
         
     with open (os.path.join(home_dir, 'person_bbox.csv'), 'w') as f:
         print "Writing bboxes to bbox file"
@@ -81,8 +98,6 @@ def annotate(home_dir):
 if __name__=='__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument("-i", "--parent_folder", required=True, help="Path to parent folder")
-    #ap.add_argument('--use_fps', dest='gpu_id', help='GPU device id to use [0]',
-    #                    default=0, type=int)
 
     args = vars(ap.parse_args())
     parent_folder = args['parent_folder']

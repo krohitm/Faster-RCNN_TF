@@ -15,12 +15,12 @@ def close_event():
 vid_array = []
 
 if __name__ == '__main__':
-    median_boundaries = np.array(np.loadtxt('/data0/krohitm/object_boundaries/person_extrapol.csv',
+    median_boundaries = np.array(np.loadtxt('/data0/krohitm/object_boundaries/person_extrapol_2.csv',
                                      dtype=str, delimiter=',', skiprows=1, ))
         
     
-    for i in range(140000,len(median_boundaries[:,0])):
-    #for i in np.arange(49995,50005):
+    #for i in range(5535,len(median_boundaries[:,0])):
+    for i in np.arange(90834,111161):
         #image_name_full = median_boundaries[i,0]
         image_name_full = '/home/krohitm/code/Faster-RCNN_TF/data/VOCdevkit2007/VOC2007/JPEGImages/{0}.jpg'.format(
                 ((str(i+1)).zfill(7)))
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         #i += 1
         #image_name_full = median_boundaries[i,0]
         plt.title(cur_image)
-        plt.savefig('/data0/krohitm/object_detection/{0}.jpg'.format((
+        plt.savefig('/data0/krohitm/object_detection_2/{0}.jpg'.format((
                 str(i+1)).zfill(7)), bbox_inches='tight')
         print "Saved {0}.jpg".format(str(i+1)).zfill(7)
         plt.close()

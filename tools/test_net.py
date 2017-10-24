@@ -90,7 +90,10 @@ if __name__ == '__main__':
 
     # start a session
     saver = tf.train.Saver()
-    sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+    config = tf.ConfigProto(allow_soft_placement=True)
+    config.gpu_options.allow_growth = True
+    sess = tf.Session(config=config)
+    #sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     saver.restore(sess, args.model)
     print ('Loading model weights from {:s}').format(args.model)
 
